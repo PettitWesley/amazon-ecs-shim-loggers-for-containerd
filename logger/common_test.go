@@ -122,11 +122,12 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int,
 func TestSendLogs(t *testing.T) {
 
 	for _, tc := range []struct {
-		testName           string
-		bufferSizeInBytes  int
-		maxReadBytes       int
-		logMessages        []string
-		expectedNumOfLines int
+		testName                       string
+		bufferSizeInBytes              int
+		maxReadBytes                   int
+		logMessages                    []string
+		expectedNumOfLines             int
+		expectedPartialOrdinalSequence []int
 	}{
 		{
 			testName:          "general case",
@@ -137,6 +138,7 @@ func TestSendLogs(t *testing.T) {
 				"Second line to write",
 			},
 			expectedNumOfLines: 2, // 2 messages stay as 2 messages
+			expectedPartialOrdinalSequence: []int{}, // neither will be partial
 		},
 		{
 			testName:          "long log message",
@@ -146,6 +148,7 @@ func TestSendLogs(t *testing.T) {
 				"First line to write", // Larger than buffer size.
 			},
 			expectedNumOfLines: 3, // One line 19 chars with 8 char buffer becomes 3 split messages
+			expectedPartialOrdinalSequence: []int{1, 2, 3},
 		},
 		{
 			testName:          "two long log messages",
@@ -156,6 +159,7 @@ func TestSendLogs(t *testing.T) {
 				"Second line to write", // 20 chars => 3 messages
 			},
 			expectedNumOfLines: 6, // 3 + 3 = 6 total
+			expectedPartialOrdinalSequence: []int{1, 2, 3, 1, 2, 3},
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
@@ -201,7 +205,7 @@ func TestSendLogs(t *testing.T) {
 			require.NoError(t, err)
 			require.NotZero(t, logDestinationInfo.Size())
 
-			checkLogFile(t, logDestinationFileName, tc.expectedNumOfLines)
+			checkLogFile(t, logDestinationFileName, tc.expectedNumOfLines, tc.expectedPartialOrdinalSequence)
 		})
 	}
 }
