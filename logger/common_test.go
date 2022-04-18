@@ -68,6 +68,7 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 	}
 	defer f.Close()
 	f.Write(msg.Line)
+	f.Write("\n")
 
 	return nil
 }
