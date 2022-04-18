@@ -81,10 +81,6 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     scanner := bufio.NewScanner(file)
     lines := 0
     for scanner.Scan() {
-		// line := scanner.Text()
-		// t.Logf("hi...")
-		// t.Logf("%s %d: %s\n", fileName, lines, line)
-		// t.Logf("size = %d\n", len(line))
         lines++
     }
 	require.Equal(t, expectedNumLines, lines)
@@ -92,31 +88,6 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     err = scanner.Err(); 
     require.NoError(t, err)
 }
-
-// func checkLogFilePartial(t *testing.T, fileName string, messages []dockerlogger.Message) {
-//     file, err := os.Open(fileName)
-//     if err != nil {
-//         log.Fatal(err)
-//     }
-//     defer file.Close()
-
-//     scanner := bufio.NewScanner(file)
-//     lines = 0
-//     for scanner.Scan() {
-// 		line = scanner.Text()
-// 		if (lines == len(messages)) {
-// 			t.Fail()
-// 			t.Logf("Expected %d log lines, got >%d", len(messages), lines)
-// 		}
-
-//         lines++
-// 		// parse line to message
-//     }
-
-//     if err := scanner.Err(); err != nil {
-//         log.Fatal(err)
-//     }
-// }
 
 // TestSendLogs tests sendLogs goroutine that gets log message from mock io pipe and sends
 // to mock destination. In this test case, the source and destination are both tmp files that
@@ -187,7 +158,7 @@ func TestSendLogs(t *testing.T) {
 			// logger sends log messages to.
 			tmpDest, err := ioutil.TempFile(os.TempDir(), "")
 			require.NoError(t, err)
-			//defer os.Remove(tmpDest.Name())
+			defer os.Remove(tmpDest.Name())
 			logDestinationFileName = tmpDest.Name()
 			t.Log(tmpDest.Name())
 			t.Log("hi please work")
