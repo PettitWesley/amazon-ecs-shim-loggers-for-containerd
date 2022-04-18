@@ -80,7 +80,10 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 }
 
 func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
-	var msg dockerlogger.Message
+	var (
+		msg dockerlogger.Message
+		line string
+	)
     file, err := os.Open(fileName)
     require.NoError(t, err)
     defer file.Close()
