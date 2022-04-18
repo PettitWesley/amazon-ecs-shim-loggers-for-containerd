@@ -140,7 +140,7 @@ func TestSendLogs(t *testing.T) {
 		t.Run(tc.testName, func(t *testing.T) {
 			l := &Logger{
 				Info:              &dockerlogger.Info{},
-				Stream:            &dummyClient{},
+				Stream:            &dummyClient{t},
 				bufferSizeInBytes: tc.bufferSizeInBytes,
 				maxReadBytes:      tc.maxReadBytes,
 			}
