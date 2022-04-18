@@ -78,13 +78,13 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     defer file.Close()
 
     scanner := bufio.NewScanner(file)
-    lines = 0
+    lines := 0
     for scanner.Scan() {
         lines++
     }
 	require.Equal(t, expectedNumLines, lines)
 
-    err := scanner.Err(); 
+    err = scanner.Err(); 
     require.NoError(t, err)
 }
 
