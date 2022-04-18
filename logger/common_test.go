@@ -174,6 +174,7 @@ func TestSendLogs(t *testing.T) {
 			)
 			for _, logMessage := range tc.logMessages {
 				expectedSize += int64(len([]rune(logMessage)))
+				expectedSize += 1 // for newline
 				_, err := testPipe.WriteString(logMessage)
 				require.NoError(t, err)
 			}
