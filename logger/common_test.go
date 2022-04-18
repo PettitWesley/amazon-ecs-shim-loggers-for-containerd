@@ -71,7 +71,7 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 			"unable to open file %s to record log message", logDestinationFileName)
 	}
 	defer f.Close()
-	b, err = json.Marshal(user)
+	b, err = json.Marshal(msg)
     require.NoError(d.t, err)
 	f.Write(b)
 	f.Write([]byte{'\n'})
