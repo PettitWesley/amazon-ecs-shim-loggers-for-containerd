@@ -138,7 +138,7 @@ func TestSendLogs(t *testing.T) {
 				"First line to write",
 				"Second line to write",
 			},
-			expectedNumOfLines: 1, 
+			expectedNumOfLines: 2, // 2 messages stay as 2 messages
 		},
 		{
 			testName:          "long log message",
@@ -147,17 +147,17 @@ func TestSendLogs(t *testing.T) {
 			logMessages: []string{
 				"First line to write", // Larger than buffer size.
 			},
-			expectedNumOfLines: 3, // Should be split to 2 lines in destination.
+			expectedNumOfLines: 3, // One line 19 chars with 8 char buffer becomes 3 split messages
 		},
 		{
-			testName:          "partial log message",
-			bufferSizeInBytes: 100,
+			testName:          "two long log messages",
+			bufferSizeInBytes: 8,
 			maxReadBytes:      4,
 			logMessages: []string{
-				"First line to write", // Larger than maximum allowed read bytes from pipe.
-				"Second line to write",
+				"First line to write", // 19 chars => 3 messages
+				"Second line to write", // 20 chars => 3 messages
 			},
-			expectedNumOfLines: 2, // Should still be 2 lines in destination.
+			expectedNumOfLines: 6 // 3 + 3 = 6 total
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
