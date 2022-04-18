@@ -171,9 +171,7 @@ func TestSendLogs(t *testing.T) {
 			// messages from.
 			tmpIOSource, err := ioutil.TempFile("", "")
 			require.NoError(t, err)
-			t.Log(tmpIOSource.Name())
-			t.Log("hi please work")
-			//defer os.Remove(tmpIOSource.Name())
+			defer os.Remove(tmpIOSource.Name())
 			var (
 				expectedSize int64
 				testPipe     bytes.Buffer
@@ -189,8 +187,10 @@ func TestSendLogs(t *testing.T) {
 			// logger sends log messages to.
 			tmpDest, err := ioutil.TempFile(os.TempDir(), "")
 			require.NoError(t, err)
-			defer os.Remove(tmpDest.Name())
+			//defer os.Remove(tmpDest.Name())
 			logDestinationFileName = tmpDest.Name()
+			t.Log(tmpDest.Name())
+			t.Log("hi please work")
 
 			var errGroup errgroup.Group
 			errGroup.Go(func() error {
