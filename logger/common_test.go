@@ -82,6 +82,7 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     lines := 0
     for scanner.Scan() {
 		line := scanner.Text()
+		t.Logf("hi...")
 		t.Logf("%s %d: %s\n", fileName, lines, line)
 		t.Logf("size = %d\n", len(line))
         lines++
