@@ -79,10 +79,13 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 	return nil
 }
 
-func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
+func checkLogFile(t *testing.T, fileName string, expectedNumLines int,
+	              expectedPartialOrdinalSequence[]int) {
 	var (
 		msg dockerlogger.Message
 		line string
+		lastPartialID string
+		lastPartialOrdinal int
 	)
     file, err := os.Open(fileName)
     require.NoError(t, err)
@@ -94,7 +97,17 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
 		line = scanner.Text()
 		err = json.Unmarshal([]byte(line), &msg)
 		require.NoError(t, err)
-		t.Log(msg)
+		if len(expectedPartialOrdinalSequence) > 0 && lines < len(expectedPartialOrdinalSequence) {
+			// check partial fields
+			require.Equal(t, expectedPartialOrdinalSequence[lines], msg.PLogMetaData.Ordinal)
+			if msg.PLogMetaData.Ordinal < lastPartialOrdinal {
+				// new split message so new partial ID
+				require.NotEqual(t, lastPartialID, msg.PLogMetaData.ID)
+			} else if msg.PLogMetaData.Ordinal > 1 {
+				// this partial ID should be same as last ID
+				require.Equal(t, lastPartialID, msg.PLogMetaData.ID)
+			}
+		} 
         lines++
     }
 	require.Equal(t, expectedNumLines, lines)
@@ -162,11 +175,9 @@ func TestSendLogs(t *testing.T) {
 				testPipe     bytes.Buffer
 			)
 			for _, logMessage := range tc.logMessages {
-				expectedSize += int64(len([]rune(logMessage)))
 				_, err := testPipe.WriteString(logMessage + "\n")
 				require.NoError(t, err)
 			}
-			expectedSize += int64(tc.expectedNumOfLines) // for newlines
 
 			// Create a tmp file that used to inside customized dummy Log function where the
 			// logger sends log messages to.
@@ -188,7 +199,7 @@ func TestSendLogs(t *testing.T) {
 			// goroutine.
 			logDestinationInfo, err := os.Stat(logDestinationFileName)
 			require.NoError(t, err)
-			require.Equal(t, expectedSize, logDestinationInfo.Size())
+			require.NotZero(t, logDestinationInfo.Size())
 
 			checkLogFile(t, logDestinationFileName, tc.expectedNumOfLines)
 		})
