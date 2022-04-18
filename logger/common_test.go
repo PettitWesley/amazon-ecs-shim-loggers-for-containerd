@@ -164,7 +164,7 @@ func TestSendLogs(t *testing.T) {
 			// logger sends log messages to.
 			tmpDest, err := ioutil.TempFile(os.TempDir(), "")
 			require.NoError(t, err)
-			defer os.Remove(tmpDest.Name())
+			//defer os.Remove(tmpDest.Name())
 			logDestinationFileName = tmpDest.Name()
 			t.Log(tmpDest.Name())
 			t.Log("hi please work")
