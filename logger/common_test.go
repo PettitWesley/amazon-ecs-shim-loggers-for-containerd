@@ -17,11 +17,13 @@ package logger
 
 import (
 	"bytes"
+	"bufio"
 	"context"
 	"io/ioutil"
 	"os"
 	"testing"
 	"time"
+
 
 	dockerlogger "github.com/docker/docker/daemon/logger"
 	"github.com/pkg/errors"
@@ -66,8 +68,25 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 	}
 	defer f.Close()
 	f.Write(msg.Line)
+	f.Write([]byte{'\n'})
 
 	return nil
+}
+
+func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
+    file, err := os.Open(fileName)
+    require.NoError(t, err)
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+    lines := 0
+    for scanner.Scan() {
+        lines++
+    }
+	require.Equal(t, expectedNumLines, lines)
+
+    err = scanner.Err(); 
+    require.NoError(t, err)
 }
 
 // TestSendLogs tests sendLogs goroutine that gets log message from mock io pipe and sends
@@ -90,7 +109,7 @@ func TestSendLogs(t *testing.T) {
 				"First line to write",
 				"Second line to write",
 			},
-			expectedNumOfLines: 2,
+			expectedNumOfLines: 2, // 2 messages stay as 2 messages
 		},
 		{
 			testName:          "long log message",
@@ -99,17 +118,17 @@ func TestSendLogs(t *testing.T) {
 			logMessages: []string{
 				"First line to write", // Larger than buffer size.
 			},
-			expectedNumOfLines: 2, // Should be split to 2 lines in destination.
+			expectedNumOfLines: 3, // One line 19 chars with 8 char buffer becomes 3 split messages
 		},
 		{
-			testName:          "partial log message",
-			bufferSizeInBytes: 100,
+			testName:          "two long log messages",
+			bufferSizeInBytes: 8,
 			maxReadBytes:      4,
 			logMessages: []string{
-				"First line to write", // Larger than maximum allowed read bytes from pipe.
-				"Second line to write",
+				"First line to write", // 19 chars => 3 messages
+				"Second line to write", // 20 chars => 3 messages
 			},
-			expectedNumOfLines: 2, // Should still be 2 lines in destination.
+			expectedNumOfLines: 6, // 3 + 3 = 6 total
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
@@ -130,9 +149,10 @@ func TestSendLogs(t *testing.T) {
 			)
 			for _, logMessage := range tc.logMessages {
 				expectedSize += int64(len([]rune(logMessage)))
-				_, err := testPipe.WriteString(logMessage)
+				_, err := testPipe.WriteString(logMessage + "\n")
 				require.NoError(t, err)
 			}
+			expectedSize += int64(tc.expectedNumOfLines) // for newlines
 
 			// Create a tmp file that used to inside customized dummy Log function where the
 			// logger sends log messages to.
@@ -140,6 +160,8 @@ func TestSendLogs(t *testing.T) {
 			require.NoError(t, err)
 			defer os.Remove(tmpDest.Name())
 			logDestinationFileName = tmpDest.Name()
+			t.Log(tmpDest.Name())
+			t.Log("hi please work")
 
 			var errGroup errgroup.Group
 			errGroup.Go(func() error {
@@ -153,6 +175,8 @@ func TestSendLogs(t *testing.T) {
 			logDestinationInfo, err := os.Stat(logDestinationFileName)
 			require.NoError(t, err)
 			require.Equal(t, expectedSize, logDestinationInfo.Size())
+
+			checkLogFile(t, logDestinationFileName, tc.expectedNumOfLines)
 		})
 	}
 }
