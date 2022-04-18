@@ -181,7 +181,7 @@ func TestSendLogs(t *testing.T) {
 				_, err := testPipe.WriteString(logMessage + "\n")
 				require.NoError(t, err)
 			}
-			expectedSize += (int64) tc.expectedNumOfLines // for newlines
+			expectedSize += int64(tc.expectedNumOfLines) // for newlines
 
 			// Create a tmp file that used to inside customized dummy Log function where the
 			// logger sends log messages to.
