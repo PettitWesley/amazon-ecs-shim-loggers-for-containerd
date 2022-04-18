@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"bufio"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
