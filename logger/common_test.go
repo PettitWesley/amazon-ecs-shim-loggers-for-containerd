@@ -70,6 +70,50 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 	return nil
 }
 
+func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
+    file, err := os.Open(fileName)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+    lines = 0
+    for scanner.Scan() {
+        lines++
+    }
+	require.Equal(t, expectedNumLines, lines)
+
+    if err := scanner.Err(); err != nil {
+        log.Fatal(err)
+    }
+}
+
+// func checkLogFilePartial(t *testing.T, fileName string, messages []dockerlogger.Message) {
+//     file, err := os.Open(fileName)
+//     if err != nil {
+//         log.Fatal(err)
+//     }
+//     defer file.Close()
+
+//     scanner := bufio.NewScanner(file)
+//     lines = 0
+//     for scanner.Scan() {
+// 		line = scanner.Text()
+// 		if (lines == len(messages)) {
+// 			t.Fail()
+// 			t.Logf("Expected %d log lines, got >%d", len(messages), lines)
+// 		}
+
+//         lines++
+// 		// parse line to message
+//     }
+
+//     if err := scanner.Err(); err != nil {
+//         log.Fatal(err)
+//     }
+// }
+
 // TestSendLogs tests sendLogs goroutine that gets log message from mock io pipe and sends
 // to mock destination. In this test case, the source and destination are both tmp files that
 // read from and write to inside the customized Log function.
@@ -153,6 +197,8 @@ func TestSendLogs(t *testing.T) {
 			logDestinationInfo, err := os.Stat(logDestinationFileName)
 			require.NoError(t, err)
 			require.Equal(t, expectedSize, logDestinationInfo.Size())
+
+			checkLogFile(t, logDestinationFileName, tc.expectedNumLines)
 		})
 	}
 }
