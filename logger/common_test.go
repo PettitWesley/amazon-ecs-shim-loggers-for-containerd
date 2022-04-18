@@ -92,7 +92,7 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     lines := 0
     for scanner.Scan() {
 		line = scanner.Text()
-		err = json.Unmarshal(line, &msg)
+		err = json.Unmarshal([]byte(line), &msg)
 		require.NoError(t, err)
 		t.Log(msg)
         lines++
