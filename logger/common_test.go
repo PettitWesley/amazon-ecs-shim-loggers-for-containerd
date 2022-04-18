@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"bufio"
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -50,13 +51,16 @@ var (
 // TestSendLogs test case as we do not need the functionality that the actual Log function
 // is doing inside the test. Mock Log function is not enough here as there does not exist a
 // better way to verify what happened in the TestSendLogs test, which has a goroutine.
-type dummyClient struct{}
+type dummyClient struct{
+	t *testing.T
+}
 
 // Log implements customized workflow used for testing purpose.
 // This is only trigger in TestSendLogs test case. It writes current log message to the end of
 // tmp test file, which makes sure the function itself accepts and "logging" the message
 // correctly.
 func (d *dummyClient) Log(msg *dockerlogger.Message) error {
+	var b []byte
 	_, err := os.Stat(logDestinationFileName)
 	if err != nil {
 		return err
@@ -67,7 +71,9 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 			"unable to open file %s to record log message", logDestinationFileName)
 	}
 	defer f.Close()
-	f.Write(msg.Line)
+	b, err = json.Marshal(user)
+    require.NoError(d.t, err)
+	f.Write(b)
 	f.Write([]byte{'\n'})
 
 	return nil
