@@ -175,7 +175,6 @@ func TestSendLogs(t *testing.T) {
 			require.NoError(t, err)
 			defer os.Remove(tmpIOSource.Name())
 			var (
-				expectedSize int64
 				testPipe     bytes.Buffer
 			)
 			for _, logMessage := range tc.logMessages {
