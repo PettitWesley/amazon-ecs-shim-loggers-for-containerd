@@ -81,10 +81,10 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     scanner := bufio.NewScanner(file)
     lines := 0
     for scanner.Scan() {
-		line := scanner.Text()
-		t.Logf("hi...")
-		t.Logf("%s %d: %s\n", fileName, lines, line)
-		t.Logf("size = %d\n", len(line))
+		// line := scanner.Text()
+		// t.Logf("hi...")
+		// t.Logf("%s %d: %s\n", fileName, lines, line)
+		// t.Logf("size = %d\n", len(line))
         lines++
     }
 	require.Equal(t, expectedNumLines, lines)
@@ -171,7 +171,9 @@ func TestSendLogs(t *testing.T) {
 			// messages from.
 			tmpIOSource, err := ioutil.TempFile("", "")
 			require.NoError(t, err)
-			defer os.Remove(tmpIOSource.Name())
+			t.Log(tmpIOSource.Name())
+			t.Log("hi please work")
+			//defer os.Remove(tmpIOSource.Name())
 			var (
 				expectedSize int64
 				testPipe     bytes.Buffer
