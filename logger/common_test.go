@@ -80,6 +80,7 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 }
 
 func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
+	var msg dockerlogger.Message
     file, err := os.Open(fileName)
     require.NoError(t, err)
     defer file.Close()
@@ -87,6 +88,10 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     scanner := bufio.NewScanner(file)
     lines := 0
     for scanner.Scan() {
+		line = scanner.Text()
+		err = json.Unmarshal(line, &msg)
+		require.NoError(t, err)
+		t.Log(msg)
         lines++
     }
 	require.Equal(t, expectedNumLines, lines)
