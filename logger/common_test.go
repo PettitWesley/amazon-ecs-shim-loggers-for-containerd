@@ -157,7 +157,7 @@ func TestSendLogs(t *testing.T) {
 				"First line to write", // 19 chars => 3 messages
 				"Second line to write", // 20 chars => 3 messages
 			},
-			expectedNumOfLines: 6 // 3 + 3 = 6 total
+			expectedNumOfLines: 6, // 3 + 3 = 6 total
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
