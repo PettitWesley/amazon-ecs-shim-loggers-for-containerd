@@ -138,7 +138,7 @@ func TestSendLogs(t *testing.T) {
 				"First line to write",
 				"Second line to write",
 			},
-			expectedNumOfLines: 2,
+			expectedNumOfLines: 1, 
 		},
 		{
 			testName:          "long log message",
@@ -147,7 +147,7 @@ func TestSendLogs(t *testing.T) {
 			logMessages: []string{
 				"First line to write", // Larger than buffer size.
 			},
-			expectedNumOfLines: 2, // Should be split to 2 lines in destination.
+			expectedNumOfLines: 3, // Should be split to 2 lines in destination.
 		},
 		{
 			testName:          "partial log message",
@@ -179,7 +179,7 @@ func TestSendLogs(t *testing.T) {
 			for _, logMessage := range tc.logMessages {
 				expectedSize += int64(len([]rune(logMessage)))
 				expectedSize += 1 // for newline
-				_, err := testPipe.WriteString(logMessage)
+				_, err := testPipe.WriteString(logMessage + "\n")
 				require.NoError(t, err)
 			}
 
