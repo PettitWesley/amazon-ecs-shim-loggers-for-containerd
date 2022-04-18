@@ -17,11 +17,13 @@ package logger
 
 import (
 	"bytes"
+	"bufio"
 	"context"
 	"io/ioutil"
 	"os"
 	"testing"
 	"time"
+
 
 	dockerlogger "github.com/docker/docker/daemon/logger"
 	"github.com/pkg/errors"
@@ -72,9 +74,7 @@ func (d *dummyClient) Log(msg *dockerlogger.Message) error {
 
 func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     file, err := os.Open(fileName)
-    if err != nil {
-        log.Fatal(err)
-    }
+    require.NoError(t, err)
     defer file.Close()
 
     scanner := bufio.NewScanner(file)
@@ -84,9 +84,8 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     }
 	require.Equal(t, expectedNumLines, lines)
 
-    if err := scanner.Err(); err != nil {
-        log.Fatal(err)
-    }
+    err := scanner.Err(); 
+    require.NoError(t, err)
 }
 
 // func checkLogFilePartial(t *testing.T, fileName string, messages []dockerlogger.Message) {
