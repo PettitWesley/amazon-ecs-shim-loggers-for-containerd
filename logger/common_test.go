@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"bufio"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -83,7 +84,7 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int) {
     for scanner.Scan() {
 		line := scanner.Text()
 		fmt.Printf("%s %d: %s\n", fileName, lines, line)
-		fmt.Println("size = " + len(line))
+		fmt.Printf("size = %d\n", len(line))
         lines++
     }
 	require.Equal(t, expectedNumLines, lines)
