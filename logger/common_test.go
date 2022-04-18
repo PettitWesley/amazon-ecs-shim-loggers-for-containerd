@@ -107,6 +107,7 @@ func checkLogFile(t *testing.T, fileName string, expectedNumLines int,
 				// this partial ID should be same as last ID
 				require.Equal(t, lastPartialID, msg.PLogMetaData.ID)
 			}
+			lastPartialID = msg.PLogMetaData.ID
 		} 
         lines++
     }
