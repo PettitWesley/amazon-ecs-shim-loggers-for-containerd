@@ -198,7 +198,7 @@ func TestSendLogs(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, expectedSize, logDestinationInfo.Size())
 
-			checkLogFile(t, logDestinationFileName, tc.expectedNumLines)
+			checkLogFile(t, logDestinationFileName, tc.expectedNumOfLines)
 		})
 	}
 }
